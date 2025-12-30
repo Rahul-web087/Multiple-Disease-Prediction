@@ -223,486 +223,15 @@
 # #     - Developed as a **Final Year Project**
 # #     """)
 #
-#
-#
-#
-#
-#
-# import os
-# import pickle
-# import streamlit as st
-# from datetime import datetime
-# from streamlit_option_menu import option_menu
-# from reportlab.platypus import SimpleDocTemplate, Paragraph
-# from reportlab.lib.styles import getSampleStyleSheet
-#
-# # ---------------- PAGE CONFIG ----------------
-# st.set_page_config(
-#     page_title="Health Assistant",
-#     page_icon="🧑‍⚕️",
-#     layout="wide"
-# )
-#
-# # ---------------- CUSTOM CSS ----------------
-# st.markdown("""
-# <style>
-# .big-card {
-#     padding: 25px;
-#     border-radius: 15px;
-#     background-color: #0f172a;
-#     box-shadow: 0px 4px 15px rgba(0,0,0,0.4);
-#     margin-bottom: 20px;
-# }
-# .result-positive {
-#     color: #ff4b4b;
-#     font-size: 22px;
-#     font-weight: bold;
-# }
-# .result-negative {
-#     color: #00ff9c;
-#     font-size: 22px;
-#     font-weight: bold;
-# }
-# </style>
-# """, unsafe_allow_html=True)
-#
-# # ---------------- LOAD MODELS ----------------
-# working_dir = os.path.dirname(os.path.abspath(__file__))
-#
-# diabetes_model = pickle.load(open(os.path.join(working_dir, "diabetes_model.sav"), "rb"))
-# heart_disease_model = pickle.load(open(os.path.join(working_dir, "heart_disease_model.sav"), "rb"))
-#
-# # ---------------- PDF FUNCTION ----------------
-# def generate_medical_pdf(
-#     patient_name,
-#     age,
-#     gender,
-#     disease_name,
-#     inputs_dict,
-#     result_text,
-#     filename="medical_report.pdf"
-# ):
-#     styles = getSampleStyleSheet()
-#     content = []
-#
-#     content.append(Paragraph("Medical Prediction Report", styles["Title"]))
-#     content.append(Paragraph(
-#         f"Date & Time: {datetime.now().strftime('%d-%m-%Y %H:%M')}",
-#         styles["Normal"]
-#     ))
-#
-#     content.append(Paragraph("<br/>", styles["Normal"]))
-#     content.append(Paragraph("Patient Details", styles["Heading2"]))
-#     content.append(Paragraph(f"Name: {patient_name}", styles["Normal"]))
-#     content.append(Paragraph(f"Age: {age}", styles["Normal"]))
-#     content.append(Paragraph(f"Gender: {gender}", styles["Normal"]))
-#
-#     content.append(Paragraph("<br/>", styles["Normal"]))
-#     content.append(Paragraph("Disease Tested", styles["Heading2"]))
-#     content.append(Paragraph(disease_name, styles["Normal"]))
-#
-#     content.append(Paragraph("<br/>", styles["Normal"]))
-#     content.append(Paragraph("Medical Parameters", styles["Heading2"]))
-#     for key, value in inputs_dict.items():
-#         content.append(Paragraph(f"{key}: {value}", styles["Normal"]))
-#
-#     content.append(Paragraph("<br/>", styles["Normal"]))
-#     content.append(Paragraph("Prediction Result", styles["Heading2"]))
-#     content.append(Paragraph(result_text, styles["Normal"]))
-#
-#     pdf = SimpleDocTemplate(filename)
-#     pdf.build(content)
-#
-# # ---------------- SIDEBAR ----------------
-# with st.sidebar:
-#     selected = option_menu(
-#         "Multiple Disease Prediction System",
-#         ["Diabetes Prediction",
-#          "Heart Disease Prediction",
-#          "Project Info"],
-#         icons=["activity", "heart", "info-circle"],
-#         menu_icon="hospital-fill",
-#         default_index=0
-#     )
-#
-#     st.markdown("### 📊 Model Accuracy")
-#     st.success("Diabetes Model: 78%")
-#     st.success("Heart Disease Model: 82%")
-#
-# # ===================== DIABETES =====================
-# if selected == "Diabetes Prediction":
-#
-#     st.markdown('<div class="big-card"><h2>🩸 Diabetes Prediction</h2></div>', unsafe_allow_html=True)
-#
-#     st.subheader("👤 Patient Details")
-#     colp1, colp2, colp3 = st.columns(3)
-#
-#     with colp1:
-#         patient_name = st.text_input("Patient Name")
-#     with colp2:
-#         patient_age = st.text_input("Age")
-#     with colp3:
-#         patient_gender = st.selectbox("Gender", ["Male", "Female", "Other"])
-#
-#     st.subheader("🧪 Medical Inputs")
-#     col1, col2, col3 = st.columns(3)
-#
-#     with col1:
-#         Pregnancies = st.text_input("Pregnancies")
-#         SkinThickness = st.text_input("Skin Thickness")
-#         DiabetesPedigreeFunction = st.text_input("Diabetes Pedigree Function")
-#
-#     with col2:
-#         Glucose = st.text_input("Glucose Level")
-#         Insulin = st.text_input("Insulin Level")
-#         Age = st.text_input("Patient Age")
-#
-#     with col3:
-#         BloodPressure = st.text_input("Blood Pressure")
-#         BMI = st.text_input("BMI")
-#
-#     if st.button("Diabetes Test Result"):
-#         if patient_name == "" or patient_age == "":
-#             st.warning("⚠️ Please enter patient details")
-#         elif "" in [Pregnancies, Glucose, BloodPressure, SkinThickness,
-#                     Insulin, BMI, DiabetesPedigreeFunction, Age]:
-#             st.warning("⚠️ Please fill all medical fields")
-#         else:
-#             user_input = [
-#                 float(Pregnancies), float(Glucose), float(BloodPressure),
-#                 float(SkinThickness), float(Insulin), float(BMI),
-#                 float(DiabetesPedigreeFunction), float(Age)
-#             ]
-#
-#             result = diabetes_model.predict([user_input])
-#
-#             if result[0] == 1:
-#                 msg = "The person is Diabetic"
-#                 st.markdown(f'<p class="result-positive">{msg}</p>', unsafe_allow_html=True)
-#             else:
-#                 msg = "The person is NOT Diabetic"
-#                 st.markdown(f'<p class="result-negative">{msg}</p>', unsafe_allow_html=True)
-#
-#             inputs_dict = {
-#                 "Pregnancies": Pregnancies,
-#                 "Glucose": Glucose,
-#                 "Blood Pressure": BloodPressure,
-#                 "Skin Thickness": SkinThickness,
-#                 "Insulin": Insulin,
-#                 "BMI": BMI,
-#                 "Diabetes Pedigree Function": DiabetesPedigreeFunction
-#             }
-#
-#             generate_medical_pdf(
-#                 patient_name,
-#                 patient_age,
-#                 patient_gender,
-#                 "Diabetes",
-#                 inputs_dict,
-#                 msg
-#             )
-#
-#             with open("medical_report.pdf", "rb") as f:
-#                 st.download_button(
-#                     "📄 Download Detailed Medical Report",
-#                     f,
-#                     file_name=f"{patient_name}_diabetes_report.pdf"
-#                 )
-#
-# # ===================== HEART =====================
-# elif selected == "Heart Disease Prediction":
-#
-#     st.markdown('<div class="big-card"><h2>❤️ Heart Disease Prediction</h2></div>', unsafe_allow_html=True)
-#
-#     st.subheader("👤 Patient Details")
-#     colp1, colp2, colp3 = st.columns(3)
-#
-#     with colp1:
-#         patient_name = st.text_input("Patient Name")
-#     with colp2:
-#         patient_age = st.text_input("Age")
-#     with colp3:
-#         patient_gender = st.selectbox("Gender", ["Male", "Female", "Other"])
-#
-#     st.subheader("🧪 Medical Inputs")
-#     col1, col2, col3 = st.columns(3)
-#
-#     with col1:
-#         age = st.text_input("Age")
-#         trestbps = st.text_input("Resting BP")
-#         restecg = st.text_input("Rest ECG")
-#         oldpeak = st.text_input("ST Depression")
-#
-#     with col2:
-#         sex = st.text_input("Sex (0/1)")
-#         chol = st.text_input("Cholesterol")
-#         thalach = st.text_input("Max Heart Rate")
-#         slope = st.text_input("Slope")
-#
-#     with col3:
-#         cp = st.text_input("Chest Pain Type")
-#         fbs = st.text_input("Fasting Blood Sugar")
-#         exang = st.text_input("Exercise Induced Angina")
-#         ca = st.text_input("Major Vessels")
-#         thal = st.text_input("Thal")
-#
-#     if st.button("Heart Disease Test Result"):
-#         if patient_name == "" or patient_age == "":
-#             st.warning("⚠️ Please enter patient details")
-#         elif "" in [age, sex, cp, trestbps, chol, fbs,
-#                     restecg, thalach, exang, oldpeak,
-#                     slope, ca, thal]:
-#             st.warning("⚠️ Please fill all medical fields")
-#         else:
-#             user_input = [
-#                 float(age), float(sex), float(cp), float(trestbps),
-#                 float(chol), float(fbs), float(restecg), float(thalach),
-#                 float(exang), float(oldpeak), float(slope),
-#                 float(ca), float(thal)
-#             ]
-#
-#             result = heart_disease_model.predict([user_input])
-#
-#             if result[0] == 1:
-#                 msg = "The person HAS Heart Disease"
-#                 st.markdown(f'<p class="result-positive">{msg}</p>', unsafe_allow_html=True)
-#             else:
-#                 msg = "The person does NOT have Heart Disease"
-#                 st.markdown(f'<p class="result-negative">{msg}</p>', unsafe_allow_html=True)
-#
-#             inputs_dict = {
-#                 "Age": age,
-#                 "Sex": sex,
-#                 "Chest Pain": cp,
-#                 "Resting BP": trestbps,
-#                 "Cholesterol": chol,
-#                 "Fasting Blood Sugar": fbs,
-#                 "Rest ECG": restecg,
-#                 "Max Heart Rate": thalach,
-#                 "Exercise Angina": exang,
-#                 "ST Depression": oldpeak,
-#                 "Slope": slope,
-#                 "Major Vessels": ca,
-#                 "Thal": thal
-#             }
-#
-#             generate_medical_pdf(
-#                 patient_name,
-#                 patient_age,
-#                 patient_gender,
-#                 "Heart Disease",
-#                 inputs_dict,
-#                 msg
-#             )
-#
-#             with open("medical_report.pdf", "rb") as f:
-#                 st.download_button(
-#                     "📄 Download Detailed Medical Report",
-#                     f,
-#                     file_name=f"{patient_name}_heart_report.pdf"
-#                 )
-#
-# # ===================== PROJECT INFO =====================
-# elif selected == "Project Info":
-#     st.title("📘 Project Information")
-#     st.markdown("""
-#     **Multiple Disease Prediction System**
-#
-#     - Streamlit-based ML health assistant
-#     - Predicts Diabetes and Heart Disease
-#     - Generates detailed medical PDF reports
-#     - Includes patient details and test parameters
-#     - Developed as a Final Year Project
-#     """)
-
-
-# import os
-# import pickle
-# import streamlit as st
-# from datetime import datetime
-# from streamlit_option_menu import option_menu
-
-# # PDF + QR
-# import qrcode
-# from reportlab.platypus import SimpleDocTemplate, Paragraph, Image
-# from reportlab.lib.styles import getSampleStyleSheet
-# from reportlab.lib.pagesizes import A4
-# from reportlab.lib.colors import lightgrey
-
-# # ---------------- PAGE CONFIG ----------------
-# st.set_page_config(page_title="Health Assistant", layout="wide")
-
-# # ---------------- LOAD MODELS ----------------
-# BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-# diabetes_model = pickle.load(open(os.path.join(BASE_DIR, "diabetes_model.sav"), "rb"))
-# heart_disease_model = pickle.load(open(os.path.join(BASE_DIR, "heart_disease_model.sav"), "rb"))
-
-# # ---------------- PDF FUNCTION ----------------
-# def generate_medical_pdf(name, age, gender, disease, params, result, filename="medical_report.pdf"):
-#     styles = getSampleStyleSheet()
-#     content = []
-
-#     qr_text = f"""
-#     Patient: {name}
-#     Age: {age}
-#     Gender: {gender}
-#     Disease: {disease}
-#     Result: {result}
-#     Date: {datetime.now().strftime('%d-%m-%Y %H:%M')}
-#     """
-
-#     qr = qrcode.make(qr_text)
-#     qr.save("qr.png")
-
-#     content.append(Paragraph("Medical Prediction Report", styles["Title"]))
-#     content.append(Paragraph(f"Date: {datetime.now().strftime('%d-%m-%Y %H:%M')}", styles["Normal"]))
-#     content.append(Paragraph("<br/>", styles["Normal"]))
-
-#     content.append(Paragraph("<b>Patient Details</b>", styles["Heading2"]))
-#     content.append(Paragraph(f"Name: {name}", styles["Normal"]))
-#     content.append(Paragraph(f"Age: {age}", styles["Normal"]))
-#     content.append(Paragraph(f"Gender: {gender}", styles["Normal"]))
-
-#     content.append(Paragraph("<br/>", styles["Normal"]))
-#     content.append(Paragraph(f"<b>Disease:</b> {disease}", styles["Normal"]))
-
-#     content.append(Paragraph("<br/>", styles["Normal"]))
-#     content.append(Paragraph("<b>Medical Parameters</b>", styles["Heading2"]))
-#     for k, v in params.items():
-#         content.append(Paragraph(f"{k}: {v}", styles["Normal"]))
-
-#     content.append(Paragraph("<br/>", styles["Normal"]))
-#     content.append(Paragraph(f"<b>Result:</b> {result}", styles["Normal"]))
-#     content.append(Image("qr.png", width=120, height=120))
-
-#     pdf = SimpleDocTemplate(filename, pagesize=A4)
-
-#     def watermark(c, d):
-#         c.saveState()
-#         c.setFont("Helvetica-Bold", 40)
-#         c.setFillColor(lightgrey)
-#         c.translate(300, 400)
-#         c.rotate(45)
-#         c.drawCentredString(0, 0, "Rahul Nayak")
-#         c.restoreState()
-
-#     pdf.build(content, onFirstPage=watermark, onLaterPages=watermark)
-
-# # ---------------- SIDEBAR ----------------
-# with st.sidebar:
-#     selected = option_menu(
-#         "Disease Prediction",
-#         ["Diabetes Prediction", "Heart Disease Prediction"],
-#         icons=["activity", "heart"],
-#         menu_icon="hospital-fill"
-#     )
-
-# # ===================== DIABETES =====================
-# if selected == "Diabetes Prediction":
-#     st.title("🩸 Diabetes Prediction")
-
-#     st.subheader("Patient Details")
-#     patient_name = st.text_input("Patient Name", key="d_name")
-#     patient_age = st.text_input("Patient Age", key="d_page")
-#     patient_gender = st.selectbox("Gender", ["Male", "Female", "Other"], key="d_gender")
-
-#     st.subheader("Medical Inputs")
-#     Pregnancies = st.text_input("Pregnancies", key="d_preg")
-#     Glucose = st.text_input("Glucose", key="d_glu")
-#     BP = st.text_input("Blood Pressure", key="d_bp")
-#     Skin = st.text_input("Skin Thickness", key="d_skin")
-#     Insulin = st.text_input("Insulin", key="d_ins")
-#     BMI = st.text_input("BMI", key="d_bmi")
-#     DPF = st.text_input("Diabetes Pedigree Function", key="d_dpf")
-#     Age = st.text_input("Age (Medical)", key="d_age")
-
-#     if st.button("Predict Diabetes"):
-#         data = [Pregnancies, Glucose, BP, Skin, Insulin, BMI, DPF, Age]
-#         if "" in data or patient_name == "":
-#             st.warning("Fill all fields")
-#         else:
-#             data = list(map(float, data))
-#             result = diabetes_model.predict([data])
-#             msg = "Diabetic" if result[0] == 1 else "Not Diabetic"
-#             st.success(msg)
-
-#             generate_medical_pdf(
-#                 patient_name, patient_age, patient_gender,
-#                 "Diabetes", {
-#                     "Pregnancies": Pregnancies,
-#                     "Glucose": Glucose,
-#                     "BP": BP,
-#                     "BMI": BMI
-#                 }, msg
-#             )
-
-#             with open("medical_report.pdf", "rb") as f:
-#                 st.download_button("Download Report", f, file_name="diabetes_report.pdf")
-
-# # ===================== HEART =====================
-# elif selected == "Heart Disease Prediction":
-#     st.title("❤️ Heart Disease Prediction")
-
-#     st.subheader("Patient Details")
-#     patient_name = st.text_input("Patient Name", key="h_name")
-#     patient_age = st.text_input("Patient Age", key="h_page")
-#     patient_gender = st.selectbox("Gender", ["Male", "Female", "Other"], key="h_gender")
-
-#     st.subheader("Medical Inputs")
-#     age = st.text_input("Age", key="h_age")
-#     sex = st.text_input("Sex (0/1)", key="h_sex")
-#     cp = st.text_input("Chest Pain", key="h_cp")
-#     trestbps = st.text_input("Resting BP", key="h_bp")
-#     chol = st.text_input("Cholesterol", key="h_chol")
-#     fbs = st.text_input("FBS", key="h_fbs")
-#     restecg = st.text_input("Rest ECG", key="h_ecg")
-#     thalach = st.text_input("Max HR", key="h_hr")
-#     exang = st.text_input("Exercise Angina", key="h_ex")
-#     oldpeak = st.text_input("Oldpeak", key="h_old")
-#     slope = st.text_input("Slope", key="h_slope")
-#     ca = st.text_input("CA", key="h_ca")
-#     thal = st.text_input("Thal", key="h_thal")
-
-#     if st.button("Predict Heart Disease"):
-#         data = [age, sex, cp, trestbps, chol, fbs, restecg,
-#                 thalach, exang, oldpeak, slope, ca, thal]
-
-#         if "" in data or patient_name == "":
-#             st.warning("Fill all fields")
-#         else:
-#             data = list(map(float, data))
-#             result = heart_disease_model.predict([data])
-#             msg = "Heart Disease Detected" if result[0] == 1 else "No Heart Disease"
-#             st.success(msg)
-
-#             generate_medical_pdf(
-#                 patient_name, patient_age, patient_gender,
-#                 "Heart Disease", {
-#                     "Age": age,
-#                     "Cholesterol": chol,
-#                     "BP": trestbps
-#                 }, msg
-#             )
-
-#             # with open("medical_report.pdf", "rb") as f:
-
-#                 st.download_button("Download Report", f, file_name="heart_report.pdf")
-
-
-
-
-
-
-
-
-
-
 
 
 import pickle
 import streamlit as st
 import numpy as np
 import os
+from reportlab.lib.pagesizes import A4
+from reportlab.pdfgen import canvas
+from datetime import datetime
 
 # ===============================
 # Page Configuration
@@ -724,12 +253,99 @@ diabetes_model = pickle.load(open(os.path.join(BASE_DIR, "diabetes_model.sav"), 
 heart_model = pickle.load(open(os.path.join(BASE_DIR, "heart_disease_model.sav"), "rb"))
 
 # ===============================
+# Doctor Advice Logic
+# ===============================
+def get_doctor_advice(disease, prediction):
+    if disease == "Diabetes":
+        if prediction == 1:
+            return (
+                "• Consult a physician immediately.\n"
+                "• Maintain a low-sugar diet.\n"
+                "• Exercise regularly.\n"
+                "• Monitor blood glucose levels."
+            )
+        else:
+            return (
+                "• Maintain a healthy diet.\n"
+                "• Exercise regularly.\n"
+                "• Avoid excessive sugar intake.\n"
+                "• Regular health checkups advised."
+            )
+
+    if disease == "Heart Disease":
+        if prediction == 1:
+            return (
+                "• Immediate consultation with a cardiologist.\n"
+                "• Avoid smoking and alcohol.\n"
+                "• Follow a heart-healthy diet.\n"
+                "• Take prescribed medicines regularly."
+            )
+        else:
+            return (
+                "• Maintain a healthy lifestyle.\n"
+                "• Exercise regularly.\n"
+                "• Avoid stress.\n"
+                "• Routine heart checkups advised."
+            )
+
+# ===============================
+# PDF Generator
+# ===============================
+def generate_pdf(patient_name, age, gender, disease, result, advice):
+    file_name = f"{patient_name.replace(' ', '_')}_Medical_Report.pdf"
+    c = canvas.Canvas(file_name, pagesize=A4)
+    width, height = A4
+
+    c.setFont("Helvetica-Bold", 20)
+    c.drawCentredString(width / 2, height - 50, "Medical Prediction Report")
+
+    c.setFont("Helvetica", 12)
+    y = height - 120
+
+    c.drawString(50, y, f"Patient Name: {patient_name}"); y -= 25
+    c.drawString(50, y, f"Age: {age}"); y -= 25
+    c.drawString(50, y, f"Gender: {gender}"); y -= 25
+    c.drawString(50, y, f"Disease Checked: {disease}"); y -= 25
+    c.drawString(50, y, f"Prediction Result: {result}"); y -= 40
+
+    c.setFont("Helvetica-Bold", 14)
+    c.drawString(50, y, "Doctor's Advice:"); y -= 25
+
+    c.setFont("Helvetica", 12)
+    for line in advice.split("\n"):
+        c.drawString(70, y, line)
+        y -= 20
+
+    y -= 10
+    c.drawString(
+        50, y,
+        f"Date & Time: {datetime.now().strftime('%d-%m-%Y %H:%M:%S')}"
+    )
+
+    # Watermark
+    c.setFont("Helvetica-Bold", 40)
+    c.setFillGray(0.9, 0.5)
+    c.drawCentredString(width / 2, height / 2, "Rahul Nayak")
+
+    c.save()
+    return file_name
+
+# ===============================
 # Sidebar Menu
 # ===============================
 menu = st.sidebar.selectbox(
     "Select Prediction",
     ["Diabetes Prediction", "Heart Disease Prediction"]
 )
+
+# ===============================
+# Common Patient Details
+# ===============================
+st.subheader("👤 Patient Details")
+
+patient_name = st.text_input("Patient Name", key="patient_name")
+patient_age = st.number_input("Patient Age", min_value=1, max_value=120, value=35, key="patient_age")
+gender = st.selectbox("Gender", ["Male", "Female", "Other"], key="patient_gender")
 
 # ======================================================
 # 🩸 DIABETES PREDICTION
@@ -741,27 +357,33 @@ if menu == "Diabetes Prediction":
     col1, col2, col3 = st.columns(3)
 
     with col1:
-        pregnancies = st.number_input("Pregnancies", min_value=0, value=0)
-        glucose = st.number_input("Glucose Level", min_value=0, value=120)
-        bp = st.number_input("Blood Pressure", min_value=0, value=70)
+        pregnancies = st.number_input("Pregnancies", 0, key="dia_preg")
+        glucose = st.number_input("Glucose Level", 0, key="dia_glucose")
+        bp = st.number_input("Blood Pressure", 0, key="dia_bp")
 
     with col2:
-        skin = st.number_input("Skin Thickness", min_value=0, value=20)
-        insulin = st.number_input("Insulin Level", min_value=0, value=80)
-        bmi = st.number_input("BMI", min_value=0.0, value=25.0)
+        skin = st.number_input("Skin Thickness", 0, key="dia_skin")
+        insulin = st.number_input("Insulin Level", 0, key="dia_insulin")
+        bmi = st.number_input("BMI", 0.0, key="dia_bmi")
 
     with col3:
-        dpf = st.number_input("Diabetes Pedigree Function", min_value=0.0, value=0.5)
-        age = st.number_input("Age", min_value=1, value=30)
+        dpf = st.number_input("Diabetes Pedigree Function", 0.0, key="dia_dpf")
 
     if st.button("Predict Diabetes"):
-        input_data = np.array([[pregnancies, glucose, bp, skin, insulin, bmi, dpf, age]])
-        prediction = diabetes_model.predict(input_data)
-
-        if prediction[0] == 1:
-            st.error("❌ Person is Diabetic")
+        if patient_name == "":
+            st.warning("Please enter patient name")
         else:
-            st.success("✅ Person is NOT Diabetic")
+            input_data = np.array([[pregnancies, glucose, bp, skin, insulin, bmi, dpf, patient_age]])
+            prediction = diabetes_model.predict(input_data)[0]
+
+            result = "Diabetes Detected ❌" if prediction == 1 else "No Diabetes ✅"
+            st.success(result)
+
+            advice = get_doctor_advice("Diabetes", prediction)
+            pdf = generate_pdf(patient_name, patient_age, gender, "Diabetes", result, advice)
+
+            with open(pdf, "rb") as f:
+                st.download_button("📄 Download Medical Report", f, file_name=pdf)
 
 # ======================================================
 # ❤️ HEART DISEASE PREDICTION
@@ -773,52 +395,58 @@ if menu == "Heart Disease Prediction":
     col1, col2, col3 = st.columns(3)
 
     with col1:
-        age = st.number_input("Age", min_value=1, value=45)
-        sex = st.selectbox("Sex", ["Male", "Female"])
-        cp = st.number_input("Chest Pain Type (0-3)", min_value=0, max_value=3)
+        sex = st.selectbox("Sex", ["Male", "Female"], key="heart_sex")
+        cp = st.number_input("Chest Pain Type (0-3)", 0, 3, key="heart_cp")
 
     with col2:
-        trestbps = st.number_input("Resting Blood Pressure", min_value=50, value=120)
-        chol = st.number_input("Cholesterol", min_value=100, value=200)
-        fbs = st.number_input("Fasting Blood Sugar (0/1)", min_value=0, max_value=1)
+        trestbps = st.number_input("Resting BP", 50, key="heart_trestbps")
+        chol = st.number_input("Cholesterol", 100, key="heart_chol")
+        fbs = st.number_input("Fasting Blood Sugar (0/1)", 0, 1, key="heart_fbs")
 
     with col3:
-        restecg = st.number_input("Rest ECG (0-2)", min_value=0, max_value=2)
-        thalach = st.number_input("Max Heart Rate", min_value=60, value=150)
-        exang = st.number_input("Exercise Angina (0/1)", min_value=0, max_value=1)
+        restecg = st.number_input("Rest ECG (0-2)", 0, 2, key="heart_restecg")
+        thalach = st.number_input("Max Heart Rate", 60, key="heart_thalach")
+        exang = st.number_input("Exercise Angina (0/1)", 0, 1, key="heart_exang")
 
     col4, col5, col6 = st.columns(3)
-
     with col4:
-        oldpeak = st.number_input("Oldpeak", min_value=0.0, value=1.0)
+        oldpeak = st.number_input("Oldpeak", 0.0, key="heart_oldpeak")
     with col5:
-        slope = st.number_input("Slope (0-2)", min_value=0, max_value=2)
+        slope = st.number_input("Slope (0-2)", 0, 2, key="heart_slope")
     with col6:
-        ca = st.number_input("CA (0-4)", min_value=0, max_value=4)
+        ca = st.number_input("CA (0-4)", 0, 4, key="heart_ca")
 
-    thal = st.number_input("Thal (0=normal,1=fixed,2=reversible)", min_value=0, max_value=2)
+    thal = st.number_input("Thal (0=normal,1=fixed,2=reversible)", 0, 2, key="heart_thal")
 
     if st.button("Predict Heart Disease"):
-        sex_val = 1 if sex == "Male" else 0
-
-        input_data = np.array([[
-            age, sex_val, cp, trestbps, chol,
-            fbs, restecg, thalach, exang,
-            oldpeak, slope, ca, thal
-        ]])
-
-        prediction = heart_model.predict(input_data)
-
-        if prediction[0] == 1:
-            st.error("❌ Heart Disease Detected")
+        if patient_name == "":
+            st.warning("Please enter patient name")
         else:
-            st.success("✅ No Heart Disease Detected")
+            sex_val = 1 if sex == "Male" else 0
+
+            input_data = np.array([[
+                patient_age, sex_val, cp, trestbps, chol,
+                fbs, restecg, thalach, exang,
+                oldpeak, slope, ca, thal
+            ]])
+
+            prediction = heart_model.predict(input_data)[0]
+
+            result = "Heart Disease Detected ❌" if prediction == 1 else "No Heart Disease ✅"
+            st.success(result)
+
+            advice = get_doctor_advice("Heart Disease", prediction)
+            pdf = generate_pdf(patient_name, patient_age, gender, "Heart Disease", result, advice)
+
+            with open(pdf, "rb") as f:
+                st.download_button("📄 Download Medical Report", f, file_name=pdf)
 
 # ===============================
 # Footer
 # ===============================
 st.markdown("---")
-st.caption("© Developed by Rahul Nayak | Deployed with Docker & Render")
+st.caption("© Developed by Rahul Nayak | Deployed using Streamlit, Docker & Render")
+
 
 
 
