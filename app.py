@@ -225,6 +225,10 @@
 #
 
 
+
+
+
+
 import pickle
 import streamlit as st
 import numpy as np
@@ -232,6 +236,7 @@ import os
 from reportlab.lib.pagesizes import A4
 from reportlab.pdfgen import canvas
 from datetime import datetime
+import qrcode
 
 # ===============================
 # Page Configuration
@@ -257,48 +262,48 @@ heart_model = pickle.load(open(os.path.join(BASE_DIR, "heart_disease_model.sav")
 # ===============================
 def get_doctor_advice(disease, prediction):
     if disease == "Diabetes":
-        if prediction == 1:
-            return (
-                "• Consult a physician immediately.\n"
-                "• Maintain a low-sugar diet.\n"
-                "• Exercise regularly.\n"
-                "• Monitor blood glucose levels."
-            )
-        else:
-            return (
-                "• Maintain a healthy diet.\n"
-                "• Exercise regularly.\n"
-                "• Avoid excessive sugar intake.\n"
-                "• Regular health checkups advised."
-            )
+        return (
+            "• Consult a physician.\n"
+            "• Maintain a low-sugar diet.\n"
+            "• Exercise regularly.\n"
+            "• Monitor blood glucose."
+            if prediction == 1 else
+            "• Maintain healthy lifestyle.\n"
+            "• Balanced diet & exercise.\n"
+            "• Regular checkups advised."
+        )
 
     if disease == "Heart Disease":
-        if prediction == 1:
-            return (
-                "• Immediate consultation with a cardiologist.\n"
-                "• Avoid smoking and alcohol.\n"
-                "• Follow a heart-healthy diet.\n"
-                "• Take prescribed medicines regularly."
-            )
-        else:
-            return (
-                "• Maintain a healthy lifestyle.\n"
-                "• Exercise regularly.\n"
-                "• Avoid stress.\n"
-                "• Routine heart checkups advised."
-            )
+        return (
+            "• Consult a cardiologist immediately.\n"
+            "• Avoid smoking & alcohol.\n"
+            "• Heart-healthy diet.\n"
+            "• Take medicines regularly."
+            if prediction == 1 else
+            "• Healthy diet & exercise.\n"
+            "• Stress management.\n"
+            "• Routine heart checkups."
+        )
 
 # ===============================
-# PDF Generator
+# PDF Generator (with QR Code)
 # ===============================
 def generate_pdf(patient_name, age, gender, disease, result, advice):
     file_name = f"{patient_name.replace(' ', '_')}_Medical_Report.pdf"
     c = canvas.Canvas(file_name, pagesize=A4)
     width, height = A4
 
+    # ---------- QR CODE ----------
+    app_url = "https://multiple-disease-prediction.onrender.com"
+    qr_img = qrcode.make(app_url)
+    qr_path = "qr_temp.png"
+    qr_img.save(qr_path)
+
+    # ---------- TITLE ----------
     c.setFont("Helvetica-Bold", 20)
     c.drawCentredString(width / 2, height - 50, "Medical Prediction Report")
 
+    # ---------- CONTENT ----------
     c.setFont("Helvetica", 12)
     y = height - 120
 
@@ -306,28 +311,38 @@ def generate_pdf(patient_name, age, gender, disease, result, advice):
     c.drawString(50, y, f"Age: {age}"); y -= 25
     c.drawString(50, y, f"Gender: {gender}"); y -= 25
     c.drawString(50, y, f"Disease Checked: {disease}"); y -= 25
-    c.drawString(50, y, f"Prediction Result: {result}"); y -= 40
+    c.drawString(50, y, f"Prediction Result: {result}"); y -= 35
 
+    # ---------- DOCTOR ADVICE ----------
     c.setFont("Helvetica-Bold", 14)
     c.drawString(50, y, "Doctor's Advice:"); y -= 25
-
     c.setFont("Helvetica", 12)
+
     for line in advice.split("\n"):
         c.drawString(70, y, line)
-        y -= 20
+        y -= 18
 
+    # ---------- DATE ----------
     y -= 10
     c.drawString(
         50, y,
         f"Date & Time: {datetime.now().strftime('%d-%m-%Y %H:%M:%S')}"
     )
 
-    # Watermark
+    # ---------- QR ----------
+    c.drawImage(qr_path, width - 170, 80, width=100, height=100)
+    c.drawString(width - 170, 65, "Scan to open App")
+
+    # ---------- WATERMARK ----------
     c.setFont("Helvetica-Bold", 40)
-    c.setFillGray(0.9, 0.5)
+    c.setFillGray(0.9, 0.4)
     c.drawCentredString(width / 2, height / 2, "Rahul Nayak")
 
     c.save()
+
+    if os.path.exists(qr_path):
+        os.remove(qr_path)
+
     return file_name
 
 # ===============================
@@ -339,16 +354,16 @@ menu = st.sidebar.selectbox(
 )
 
 # ===============================
-# Common Patient Details
+# Patient Details (COMMON)
 # ===============================
 st.subheader("👤 Patient Details")
 
 patient_name = st.text_input("Patient Name", key="patient_name")
-patient_age = st.number_input("Patient Age", min_value=1, max_value=120, value=35, key="patient_age")
+patient_age = st.number_input("Patient Age", 1, 120, 35, key="patient_age")
 gender = st.selectbox("Gender", ["Male", "Female", "Other"], key="patient_gender")
 
 # ======================================================
-# 🩸 DIABETES PREDICTION
+# 🩸 DIABETES
 # ======================================================
 if menu == "Diabetes Prediction":
 
@@ -386,7 +401,7 @@ if menu == "Diabetes Prediction":
                 st.download_button("📄 Download Medical Report", f, file_name=pdf)
 
 # ======================================================
-# ❤️ HEART DISEASE PREDICTION
+# ❤️ HEART DISEASE
 # ======================================================
 if menu == "Heart Disease Prediction":
 
@@ -395,7 +410,7 @@ if menu == "Heart Disease Prediction":
     col1, col2, col3 = st.columns(3)
 
     with col1:
-        sex = st.selectbox("Sex", ["Male", "Female"], key="heart_sex")
+        sex = st.selectbox("Sex (Male=1, Female=0)", ["Male", "Female"], key="heart_sex")
         cp = st.number_input("Chest Pain Type (0-3)", 0, 3, key="heart_cp")
 
     with col2:
@@ -445,17 +460,4 @@ if menu == "Heart Disease Prediction":
 # Footer
 # ===============================
 st.markdown("---")
-st.caption("© Developed by Rahul Nayak | Deployed using Streamlit, Docker & Render")
-
-
-
-
-
-
-
-
-
-
-
-
-
+st.caption("© Developed by Rahul Nayak | Streamlit • Docker • Render")
