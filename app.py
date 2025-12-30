@@ -460,4 +460,5 @@ if menu == "Heart Disease Prediction":
 # Footer
 # ===============================
 st.markdown("---")
-st.caption("© Developed by Rahul Nayak | Streamlit • Docker • Render")
+st.caption("© Developed by Rahul Nayak ")
+
