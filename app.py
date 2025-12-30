@@ -699,13 +699,149 @@
 
 
 
+# import pickle
+# import streamlit as st
+# import numpy as np
+# import os
+
+# # ===============================
+# # Page Configuration
+# # ===============================
+# st.set_page_config(
+#     page_title="Health Assistant",
+#     page_icon="🧑‍⚕️",
+#     layout="wide"
+# )
+
+# st.title("🧑‍⚕️ Multiple Disease Prediction System")
+
+# # ===============================
+# # Load Models
+# # ===============================
+# BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+
+# diabetes_model = pickle.load(open(os.path.join(BASE_DIR, "diabetes_model.sav"), "rb"))
+# heart_model = pickle.load(open(os.path.join(BASE_DIR, "heart_disease_model.sav"), "rb"))
+
+# # ===============================
+# # Sidebar Menu
+# # ===============================
+# menu = st.sidebar.selectbox(
+#     "Select Prediction",
+#     ["Diabetes Prediction", "Heart Disease Prediction"]
+# )
+
+# # ======================================================
+# # 🩸 DIABETES PREDICTION
+# # ======================================================
+# if menu == "Diabetes Prediction":
+
+#     st.header("🩸 Diabetes Prediction")
+
+#     col1, col2, col3 = st.columns(3)
+
+#     with col1:
+#         pregnancies = st.number_input("Pregnancies", min_value=0, value=0)
+#         glucose = st.number_input("Glucose Level", min_value=0, value=120)
+#         bp = st.number_input("Blood Pressure", min_value=0, value=70)
+
+#     with col2:
+#         skin = st.number_input("Skin Thickness", min_value=0, value=20)
+#         insulin = st.number_input("Insulin Level", min_value=0, value=80)
+#         bmi = st.number_input("BMI", min_value=0.0, value=25.0)
+
+#     with col3:
+#         dpf = st.number_input("Diabetes Pedigree Function", min_value=0.0, value=0.5)
+#         age = st.number_input("Age", min_value=1, value=30)
+
+#     if st.button("Predict Diabetes"):
+#         input_data = np.array([[pregnancies, glucose, bp, skin, insulin, bmi, dpf, age]])
+#         prediction = diabetes_model.predict(input_data)
+
+#         if prediction[0] == 1:
+#             st.error("❌ Person is Diabetic")
+#         else:
+#             st.success("✅ Person is NOT Diabetic")
+
+# # ======================================================
+# # ❤️ HEART DISEASE PREDICTION
+# # ======================================================
+# if menu == "Heart Disease Prediction":
+
+#     st.header("❤️ Heart Disease Prediction")
+
+#     col1, col2, col3 = st.columns(3)
+
+#     with col1:
+#         age = st.number_input("Age", min_value=1, value=45)
+#         sex = st.selectbox("Sex", ["Male", "Female"])
+#         cp = st.number_input("Chest Pain Type (0-3)", min_value=0, max_value=3)
+
+#     with col2:
+#         trestbps = st.number_input("Resting Blood Pressure", min_value=50, value=120)
+#         chol = st.number_input("Cholesterol", min_value=100, value=200)
+#         fbs = st.number_input("Fasting Blood Sugar (0/1)", min_value=0, max_value=1)
+
+#     with col3:
+#         restecg = st.number_input("Rest ECG (0-2)", min_value=0, max_value=2)
+#         thalach = st.number_input("Max Heart Rate", min_value=60, value=150)
+#         exang = st.number_input("Exercise Angina (0/1)", min_value=0, max_value=1)
+
+#     col4, col5, col6 = st.columns(3)
+
+#     with col4:
+#         oldpeak = st.number_input("Oldpeak", min_value=0.0, value=1.0)
+#     with col5:
+#         slope = st.number_input("Slope (0-2)", min_value=0, max_value=2)
+#     with col6:
+#         ca = st.number_input("CA (0-4)", min_value=0, max_value=4)
+
+#     thal = st.number_input("Thal (0=normal,1=fixed,2=reversible)", min_value=0, max_value=2)
+
+#     if st.button("Predict Heart Disease"):
+#         sex_val = 1 if sex == "Male" else 0
+
+#         input_data = np.array([[
+#             age, sex_val, cp, trestbps, chol,
+#             fbs, restecg, thalach, exang,
+#             oldpeak, slope, ca, thal
+#         ]])
+
+#         prediction = heart_model.predict(input_data)
+
+#         if prediction[0] == 1:
+#             st.error("❌ Heart Disease Detected")
+#         else:
+#             st.success("✅ No Heart Disease Detected")
+
+# # ===============================
+# # Footer
+# # ===============================
+# st.markdown("---")
+# st.caption("© Developed by Rahul Nayak | Deployed with Docker & Render")
+
+
+
+
+
+
+
+
+
+
 import pickle
 import streamlit as st
 import numpy as np
 import os
+from datetime import datetime
+
+# PDF & QR
+from reportlab.lib.pagesizes import A4
+from reportlab.pdfgen import canvas
+import qrcode
 
 # ===============================
-# Page Configuration
+# PAGE CONFIG
 # ===============================
 st.set_page_config(
     page_title="Health Assistant",
@@ -713,18 +849,94 @@ st.set_page_config(
     layout="wide"
 )
 
+# ===============================
+# MODERN UI (CSS)
+# ===============================
+st.markdown("""
+<style>
+.main { background-color: #0f172a; }
+h1, h2, h3 { color: #facc15; }
+.stButton>button {
+    background-color: #facc15;
+    color: black;
+    border-radius: 10px;
+    height: 45px;
+    font-size: 16px;
+}
+</style>
+""", unsafe_allow_html=True)
+
 st.title("🧑‍⚕️ Multiple Disease Prediction System")
 
 # ===============================
-# Load Models
+# LOAD MODELS (Cloud Safe)
 # ===============================
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
-diabetes_model = pickle.load(open(os.path.join(BASE_DIR, "diabetes_model.sav"), "rb"))
-heart_model = pickle.load(open(os.path.join(BASE_DIR, "heart_disease_model.sav"), "rb"))
+diabetes_model = pickle.load(
+    open(os.path.join(BASE_DIR, "diabetes_model.sav"), "rb")
+)
+
+heart_model = pickle.load(
+    open(os.path.join(BASE_DIR, "heart_disease_model.sav"), "rb")
+)
 
 # ===============================
-# Sidebar Menu
+# PDF GENERATOR (Watermark + QR)
+# ===============================
+def generate_pdf(patient_name, age, gender, disease, result):
+    file_name = "medical_report.pdf"
+
+    # QR Code (Live App URL)
+    app_url = "https://multiple-disease-prediction.onrender.com"
+    qr = qrcode.make(app_url)
+    qr_path = "qr_code.png"
+    qr.save(qr_path)
+
+    c = canvas.Canvas(file_name, pagesize=A4)
+    width, height = A4
+
+    # Watermark
+    c.setFont("Helvetica", 40)
+    c.setFillGray(0.9)
+    c.saveState()
+    c.translate(300, 400)
+    c.rotate(45)
+    c.drawCentredString(0, 0, "Rahul Nayak")
+    c.restoreState()
+
+    # Title
+    c.setFillGray(0)
+    c.setFont("Helvetica-Bold", 18)
+    c.drawString(50, height - 50, "Medical Prediction Report")
+
+    # Content
+    c.setFont("Helvetica", 12)
+    y = height - 100
+
+    details = [
+        f"Patient Name: {patient_name}",
+        f"Age: {age}",
+        f"Gender: {gender}",
+        f"Disease Type: {disease}",
+        f"Prediction Result: {result}",
+        f"Date & Time: {datetime.now().strftime('%d-%m-%Y %H:%M')}"
+    ]
+
+    for line in details:
+        c.drawString(50, y, line)
+        y -= 30
+
+    # QR Section
+    c.setFont("Helvetica-Bold", 12)
+    c.drawString(50, y - 20, "Scan QR Code to Open Live Application:")
+    c.drawImage(qr_path, 50, y - 180, width=120, height=120)
+
+    c.save()
+    return file_name
+
+# ===============================
+# SIDEBAR MENU
 # ===============================
 menu = st.sidebar.selectbox(
     "Select Prediction",
@@ -738,30 +950,68 @@ if menu == "Diabetes Prediction":
 
     st.header("🩸 Diabetes Prediction")
 
-    col1, col2, col3 = st.columns(3)
+    st.subheader("👤 Patient Details")
+    p1, p2, p3 = st.columns(3)
+    patient_name = p1.text_input("Patient Name")
+    patient_age = p2.number_input("Age", min_value=1, value=30)
+    patient_gender = p3.selectbox(
+        "Gender", ["Male", "Female", "Other"]
+    )
 
-    with col1:
+    st.subheader("🧪 Medical Inputs")
+    c1, c2, c3 = st.columns(3)
+
+    with c1:
         pregnancies = st.number_input("Pregnancies", min_value=0, value=0)
         glucose = st.number_input("Glucose Level", min_value=0, value=120)
         bp = st.number_input("Blood Pressure", min_value=0, value=70)
 
-    with col2:
+    with c2:
         skin = st.number_input("Skin Thickness", min_value=0, value=20)
         insulin = st.number_input("Insulin Level", min_value=0, value=80)
         bmi = st.number_input("BMI", min_value=0.0, value=25.0)
 
-    with col3:
-        dpf = st.number_input("Diabetes Pedigree Function", min_value=0.0, value=0.5)
-        age = st.number_input("Age", min_value=1, value=30)
+    with c3:
+        dpf = st.number_input(
+            "Diabetes Pedigree Function", min_value=0.0, value=0.5
+        )
+        age = st.number_input(
+            "Age (Medical)", min_value=1, value=30
+        )
 
     if st.button("Predict Diabetes"):
-        input_data = np.array([[pregnancies, glucose, bp, skin, insulin, bmi, dpf, age]])
-        prediction = diabetes_model.predict(input_data)
-
-        if prediction[0] == 1:
-            st.error("❌ Person is Diabetic")
+        if patient_name.strip() == "":
+            st.warning("Please enter Patient Name")
         else:
-            st.success("✅ Person is NOT Diabetic")
+            input_data = np.array([[
+                pregnancies, glucose, bp, skin,
+                insulin, bmi, dpf, age
+            ]])
+
+            prediction = diabetes_model.predict(input_data)
+
+            if prediction[0] == 1:
+                result_text = "POSITIVE (Diabetic)"
+                st.error("❌ Person is Diabetic")
+            else:
+                result_text = "NEGATIVE (Not Diabetic)"
+                st.success("✅ Person is NOT Diabetic")
+
+            pdf_file = generate_pdf(
+                patient_name,
+                patient_age,
+                patient_gender,
+                "Diabetes",
+                result_text
+            )
+
+            with open(pdf_file, "rb") as f:
+                st.download_button(
+                    "⬇️ Download Medical Report (PDF)",
+                    f,
+                    file_name="diabetes_medical_report.pdf",
+                    mime="application/pdf"
+                )
 
 # ======================================================
 # ❤️ HEART DISEASE PREDICTION
@@ -770,52 +1020,97 @@ if menu == "Heart Disease Prediction":
 
     st.header("❤️ Heart Disease Prediction")
 
-    col1, col2, col3 = st.columns(3)
+    st.subheader("👤 Patient Details")
+    p1, p2, p3 = st.columns(3)
+    patient_name = p1.text_input("Patient Name")
+    patient_age = p2.number_input("Age", min_value=1, value=45)
+    patient_gender = p3.selectbox(
+        "Gender", ["Male", "Female", "Other"]
+    )
 
-    with col1:
+    st.subheader("🧪 Medical Inputs")
+    c1, c2, c3 = st.columns(3)
+
+    with c1:
         age = st.number_input("Age", min_value=1, value=45)
         sex = st.selectbox("Sex", ["Male", "Female"])
-        cp = st.number_input("Chest Pain Type (0-3)", min_value=0, max_value=3)
+        cp = st.number_input("Chest Pain Type (0–3)", min_value=0, max_value=3)
 
-    with col2:
-        trestbps = st.number_input("Resting Blood Pressure", min_value=50, value=120)
+    with c2:
+        trestbps = st.number_input("Resting BP", min_value=50, value=120)
         chol = st.number_input("Cholesterol", min_value=100, value=200)
-        fbs = st.number_input("Fasting Blood Sugar (0/1)", min_value=0, max_value=1)
+        fbs = st.number_input(
+            "Fasting Blood Sugar (0/1)", min_value=0, max_value=1
+        )
 
-    with col3:
-        restecg = st.number_input("Rest ECG (0-2)", min_value=0, max_value=2)
-        thalach = st.number_input("Max Heart Rate", min_value=60, value=150)
-        exang = st.number_input("Exercise Angina (0/1)", min_value=0, max_value=1)
+    with c3:
+        restecg = st.number_input(
+            "Rest ECG (0–2)", min_value=0, max_value=2
+        )
+        thalach = st.number_input(
+            "Max Heart Rate", min_value=60, value=150
+        )
+        exang = st.number_input(
+            "Exercise Angina (0/1)", min_value=0, max_value=1
+        )
 
-    col4, col5, col6 = st.columns(3)
-
-    with col4:
+    c4, c5, c6 = st.columns(3)
+    with c4:
         oldpeak = st.number_input("Oldpeak", min_value=0.0, value=1.0)
-    with col5:
-        slope = st.number_input("Slope (0-2)", min_value=0, max_value=2)
-    with col6:
-        ca = st.number_input("CA (0-4)", min_value=0, max_value=4)
+    with c5:
+        slope = st.number_input(
+            "Slope (0–2)", min_value=0, max_value=2
+        )
+    with c6:
+        ca = st.number_input(
+            "CA (0–4)", min_value=0, max_value=4
+        )
 
-    thal = st.number_input("Thal (0=normal,1=fixed,2=reversible)", min_value=0, max_value=2)
+    thal = st.number_input(
+        "Thal (0=normal,1=fixed,2=reversible)",
+        min_value=0, max_value=2
+    )
 
     if st.button("Predict Heart Disease"):
-        sex_val = 1 if sex == "Male" else 0
-
-        input_data = np.array([[
-            age, sex_val, cp, trestbps, chol,
-            fbs, restecg, thalach, exang,
-            oldpeak, slope, ca, thal
-        ]])
-
-        prediction = heart_model.predict(input_data)
-
-        if prediction[0] == 1:
-            st.error("❌ Heart Disease Detected")
+        if patient_name.strip() == "":
+            st.warning("Please enter Patient Name")
         else:
-            st.success("✅ No Heart Disease Detected")
+            sex_val = 1 if sex == "Male" else 0
+
+            input_data = np.array([[
+                age, sex_val, cp, trestbps, chol,
+                fbs, restecg, thalach, exang,
+                oldpeak, slope, ca, thal
+            ]])
+
+            prediction = heart_model.predict(input_data)
+
+            if prediction[0] == 1:
+                result_text = "POSITIVE (Heart Disease Detected)"
+                st.error("❌ Heart Disease Detected")
+            else:
+                result_text = "NEGATIVE (No Heart Disease)"
+                st.success("✅ No Heart Disease Detected")
+
+            pdf_file = generate_pdf(
+                patient_name,
+                patient_age,
+                patient_gender,
+                "Heart Disease",
+                result_text
+            )
+
+            with open(pdf_file, "rb") as f:
+                st.download_button(
+                    "⬇️ Download Medical Report (PDF)",
+                    f,
+                    file_name="heart_disease_medical_report.pdf",
+                    mime="application/pdf"
+                )
 
 # ===============================
-# Footer
+# FOOTER
 # ===============================
 st.markdown("---")
-st.caption("© Developed by Rahul Nayak | Deployed with Docker & Render")
+st.caption(
+    "© Developed by Rahul Nayak ")
