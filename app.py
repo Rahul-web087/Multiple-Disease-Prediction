@@ -242,12 +242,6 @@ if "GOOGLE_SITE_VERIFICATION" in os.environ:
         unsafe_allow_html=True
     )
 
-# Page config
-st.set_page_config(
-    page_title="Health Assistant",
-    page_icon="🧑‍⚕️",
-    layout="wide"
-)
 # ===============================
 # Page Configuration
 # ===============================
@@ -502,4 +496,5 @@ if menu == "Heart Disease Prediction":
 # ===============================
 st.markdown("---")
 st.caption("© Developed by Rahul Nayak ")
+
 
