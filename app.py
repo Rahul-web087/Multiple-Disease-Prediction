@@ -232,6 +232,22 @@ from reportlab.lib.pagesizes import A4
 from reportlab.pdfgen import canvas
 from datetime import datetime
 
+
+
+
+# 👇 GOOGLE VERIFICATION (YAHI ADD KARO)
+if "GOOGLE_SITE_VERIFICATION" in os.environ:
+    st.markdown(
+        f'<meta name="google-site-verification" content="{os.environ["GOOGLE_SITE_VERIFICATION"]}" />',
+        unsafe_allow_html=True
+    )
+
+# Page config
+st.set_page_config(
+    page_title="Health Assistant",
+    page_icon="🧑‍⚕️",
+    layout="wide"
+)
 # ===============================
 # Page Configuration
 # ===============================
@@ -486,3 +502,4 @@ if menu == "Heart Disease Prediction":
 # ===============================
 st.markdown("---")
 st.caption("© Developed by Rahul Nayak ")
+
