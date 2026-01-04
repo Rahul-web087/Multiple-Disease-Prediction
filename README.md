@@ -1,7 +1,6 @@
 # Multiple-Disease-Prediction
 
-#A Machine Learning–based Healthcare Web Application that predicts the likelihood of Diabetes and Heart Disease based on user inputs.
-The system generates a downloadable medical PDF report with doctor advice
+# A Machine Learning–based Healthcare Web Application that predicts the likelihood of Diabetes and Heart Disease based on user inputs,The system generates a downloadable medical PDF report with doctor advice .
 
 
 
@@ -48,10 +47,9 @@ Render –  Deployment
 
  ⚠️  # It is designed for educational and informational purposes only and does not replace professional medical diagnosis.
 
+           Author
 
-# Author
-
-# Rahul Nayak
+#                   Rahul Nayak
 
 
 
